@@ -72,10 +72,11 @@ var renderPart = function(docPart, options) {
   var inUsage = false;
   var usageDepth = 1;
 
-  tokens = _.map(tokens, function(obj) {
+  tokens = _.filter(tokens, function(obj) {
     //console.debug(obj);
     // check if we are in the usage paragraph
     if (obj.type === 'heading') {
+      if (obj.depth === 1 && options.removeTopHeading) return false;
       if (inUsage === true && obj.depth <= usageDepth) inUsage = false;
       else if (obj.text.toLowerCase() === 'usage') {
         usageDepth = obj.depth; // depth of the usage heading
@@ -83,7 +84,7 @@ var renderPart = function(docPart, options) {
       }
     }
     debug('inUsage %s', inUsage);
-    if (inUsage === false || obj.type !== 'paragraph') return obj;
+    if (inUsage === false || obj.type !== 'paragraph') return true;
 
     //console.debug(obj);
 
@@ -96,7 +97,7 @@ var renderPart = function(docPart, options) {
 
       docPart.demos[key] = fs.readFileSync(exPath, 'utf8');
     }
-    return obj;
+    return true;
   });
 
   tokens.links = tempLinks;
@@ -133,7 +134,8 @@ function genDoc(options) {
     basePath: '',
     packages: [],
     parts: [],
-    output: process.cwd() + '/./doc.json'
+    output: process.cwd() + '/./doc.json',
+    removeTopHeading: true
   });
 
   if (options.entryPackage !== undefined) {
