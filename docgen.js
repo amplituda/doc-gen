@@ -64,6 +64,7 @@ var fetchPackage = function(name, options) {
 };
 
 var renderPart = function(docPart, options) {
+  if (docPart.vcl === undefined) docPart.vcl = {};
   var lexer = new marked.Lexer();
   var tokens = lexer.lex(docPart.readme.toString());
   var tempLinks = tokens.links;
@@ -105,6 +106,12 @@ var renderPart = function(docPart, options) {
   debug('done parsing');
 
   docPart.readme = parsed;
+
+  var fallbackTitle = /vcl-(.+)/.exec(docPart.name);
+  if (fallbackTitle.length >= 2){
+    fallbackTitle = _.capitalize(fallbackTitle[1]);
+  } else fallbackTitle = _.capitalize(docPart.name);
+  docPart.title = docPart.vcl.title || fallbackTitle;
 
   if (options.cssProcessor === undefined) {
     options.cssProcessor = function(style, pack) {
