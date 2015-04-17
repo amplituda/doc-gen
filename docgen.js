@@ -55,7 +55,8 @@ var fetchPackage = function(name, options) {
     devDependencies: pack.devDependencies,
     readme: readme,
     style: fs.readFileSync(basePath + pack.style), // TODO: async
-    demos: {}
+    demos: {},
+    description: pack.description
   };
 
   //console.debug(docPart);
