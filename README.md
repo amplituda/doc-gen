@@ -6,6 +6,22 @@ VCL Docgen
 
 Example:
 
+### HTML Documentation
+
+```
+var docGenerator = require('vcl-docgen');
+
+
+docGenerator.generateHtml({
+  name: 'VCL Documentation',
+  entryPackage: './package.json',
+  output: './documentation.html'
+});
+
+```
+
+### Get JSON
+
 ```
 var docGenerator = require('vcl-docgen');
 

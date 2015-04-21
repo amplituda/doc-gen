@@ -7,6 +7,8 @@ var _ = require('lodash');
 var resolve = require('resolve');
 var preprocessor = require('vcl-preprocessor');
 
+var docClient = require('vcl-doc-client');
+
 var marked = require('marked');
 
 var fetchPackage = function(name, options) {
@@ -136,13 +138,12 @@ var renderPart = function(docPart, options) {
 
 };
 
-function genDoc(options) {
+function genJson(options) {
   var doc = options || {};
   _.defaults(options, {
     basePath: '',
     packages: [],
     parts: [],
-    output: process.cwd() + '/./doc.json',
     removeTopHeading: true
   });
 
@@ -159,7 +160,27 @@ function genDoc(options) {
     var pack = fetchPackage(name, options);
     if (pack) doc.parts.push(pack);
   });
+  return doc;
+}
+
+function genDoc(options) {
+  var doc = genJson(options);
+  _.defaults(options, {
+    output: process.cwd() + '/./doc.json'
+  });
   fs.writeFileSync(options.output, JSON.stringify(doc, null, 2));
 }
 
+function genHtml(options) {
+  var doc = genJson(options);
+  _.defaults(options, {
+    output: process.cwd() + '/./somedoc.html'
+  });
+  docClient.getBuild(doc, function(html) {
+    fs.writeFileSync(options.output, html);
+  });
+}
+
 exports.generate = genDoc;
+exports.generateJson = genDoc;
+exports.generateHtml = genHtml;
