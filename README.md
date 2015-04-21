@@ -8,7 +8,7 @@ Example:
 
 ### HTML Documentation
 
-```
+```JavaScript
 var docGenerator = require('vcl-docgen');
 
 
@@ -22,7 +22,7 @@ docGenerator.generateHtml({
 
 ### Get JSON
 
-```
+```JavaScript
 var docGenerator = require('vcl-docgen');
 
 
@@ -49,7 +49,7 @@ generate the Documentation from.
 
 ### packages
 You can put paths to additional packages here or use this as an alternative to
-the `entryPackage` option and provide your packages manually.
+the `entryPackage` option and set your packages manually.
 
 **Example:** `packages: ['../vcl-test', './some/package']`
 
