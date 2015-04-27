@@ -121,7 +121,8 @@ var renderPart = function(docPart, options) {
 
       var css = preprocessor.package(pack.basePath, {
         providers: ['vcl-default-theme', 'vcl-default-theme-terms'],
-        includeDevDependencies: true
+        includeDevDependencies: true,
+        docGenMode: true
       });
 
       return css.toString();
