@@ -86,6 +86,9 @@ var renderPart = function(docPart, options) {
         usageDepth = obj.depth; // depth of the usage heading
         inUsage = true;
       }
+      else if (obj.text.toLowerCase() === 'demo') {
+        return false; // filters everything after demo
+      }
     }
     debug('inUsage %s', inUsage);
     if (inUsage === false || obj.type !== 'paragraph') return true;
