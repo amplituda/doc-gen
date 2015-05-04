@@ -58,6 +58,11 @@ var fetchPackage = function(name, options) {
     readme: readme,
     style: fs.readFileSync(basePath + pack.style), // TODO: async
     demos: {},
+    // extra info
+    repository: pack.repository,
+    author: pack.author,
+    version: pack.version,
+    license: pack.license,
     description: pack.description
   };
 
