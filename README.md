@@ -6,6 +6,34 @@ VCL Docgen
 
 Example:
 
+### CLI
+
+```Shell
+npm -g i vcl/vcl-docgen
+cd someProject
+vcl-docgen --entry ./package.json --output doc.html
+```
+
+#### Options
+All options are optional.
+
+Option      | Default                 | Description
+ ---        | ---                     | ---
+`--name`    | `VCL Documentation`     | Browser Title & Main heading
+`--output`  | `vcl-documentation.html`| Output HTML file
+`--entry`   | `./package.json`        | Entry file.
+`--basePath`| current working dir     |
+
+See [Options](https://github.com/vcl/doc-gen#options) for a more detailed description.
+
+#### Local CLI
+
+```Shell
+npm install --save-dev vcl/vcl-docgen
+./node_modules/.bin/vcl-docgen
+```
+
+
 ### HTML Documentation
 
 ```JavaScript
