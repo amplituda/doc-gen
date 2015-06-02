@@ -1,6 +1,11 @@
 VCL Docgen
 ==========
 
+Lets you generate a VCL Documentation based on various packages or an entry point `package.json`.
+In most cases you want the docgen to parse the `package.json` from your project and generate a HTML Documentation listing all dependencies. The generated doc will look something like [this](https://vcl.github.com/).
+
+You can also generate a JSON doc only, which includes all infos needed to display it in a browser for example. This is what the [vcl-doc-client](https://github.com/vcl/doc-client) uses to render the documentation.
+
 
 ## Usage
 
