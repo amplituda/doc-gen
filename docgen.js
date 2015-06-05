@@ -11,13 +11,9 @@ var docClient = require('vcl-doc-client');
 
 var marked = require('marked');
 
-var fetchPackage = function(name, options) {
-  // TODO: get package.json using require
-  debug('fetching package: %s', name);
-  _.defaults(options, {
-    metaName: 'vcl'
-  });
 
+var getPackageJson = function(name, basedir) {
+  debug('gettings package.json for %s from %s', name, basedir);
   function fixNoMain(pkg) {
     // make all modules require-able
     pkg.main = 'package.json';
@@ -26,13 +22,27 @@ var fetchPackage = function(name, options) {
   var npmModule = null;
   // get module information
   var npmModulePath = resolve.sync(name, {
-    basedir: process.cwd(),
+    basedir: basedir || process.cwd(),
     packageFilter: fixNoMain
   });
-  var basePath = path.dirname(npmModulePath) + '/';
-  npmModule = JSON.parse(fs.readFileSync(npmModulePath, 'utf8'));
 
-  var pack = npmModule;
+  npmModule = JSON.parse(fs.readFileSync(npmModulePath, 'utf8'));
+  npmModule.basePath = path.dirname(npmModulePath) + '/';
+
+  return npmModule;
+};
+
+var fetchPackage = function(pack, options) {
+  // TODO: get package.json using require
+  var name = pack.name;
+  debug('fetching package: %s', name);
+  _.defaults(options, {
+    metaName: 'vcl'
+  });
+
+  //var npmModule = getPackageJson(name);
+  var basePath = pack.basePath;
+
 
   if (pack.vcl === undefined) {
     debug('WARN: non vcl package passed!');
@@ -53,7 +63,7 @@ var fetchPackage = function(name, options) {
     basePath: basePath,
     fullPath: basePath + pack.style,
     docgen: pack[options.metaName],
-    depdendencies: pack.depdendencies,
+    dependencies: pack.dependencies,
     devDependencies: pack.devDependencies,
     readme: readme,
     style: fs.readFileSync(basePath + pack.style), // TODO: async
@@ -71,6 +81,7 @@ var fetchPackage = function(name, options) {
   return renderPart(docPart, options);
 };
 
+// we have all information we need. this function uses it to generate the html
 var renderPart = function(docPart, options) {
   if (docPart.vcl === undefined) docPart.vcl = {};
   var lexer = new marked.Lexer();
@@ -127,6 +138,8 @@ var renderPart = function(docPart, options) {
   if (options.cssProcessor === undefined) {
     options.cssProcessor = function(style, pack) {
 
+      debug('preprocessing %s', pack.name);
+      debug('from %s', pack.basePath);
       var css = preprocessor.package(pack.basePath, {
         providers: ['vcl-default-theme', 'vcl-default-theme-terms'],
         includeDevDependencies: true,
@@ -148,21 +161,41 @@ var renderPart = function(docPart, options) {
 };
 
 function genJson(options) {
+  debug('generating json');
   var doc = options || {};
   _.defaults(options, {
     basePath: '',
     packages: [],
     parts: [],
-    removeTopHeading: true
+    removeTopHeading: true,
+    recursive: true,
+    includeDevDependencies: true
   });
+
+  function addDependencies(deps, basePath) {
+    basePath = basePath || options.basePath || null;
+    _.each(deps, function(val, key){
+      // TODO: filter out non-vcl packages here
+      var json = getPackageJson(key, basePath);
+      if (json.vcl === undefined) return; // not a vcl package
+      options.packages.push(json);
+      if (options.recursive === true) {
+        if (_.isEmpty(json.dependencies)) return; // no dependencies
+        addDependencies(json.dependencies, json.basePath);
+      }
+    });
+  }
 
   if (options.entryPackage !== undefined) {
     // TODO: use resolve
+    debug('entry package');
     var data = require(options.entryPackage);
-    _.each(data.dependencies, function(val, key){
-      // TODO: filter out non-vcl packages here
-      options.packages.push(key);
-    });
+    var deps = data.dependencies;
+    if (options.includeDevDependencies){
+      deps = _.merge(deps || {}, data.devDependencies || {});
+    }
+    if (_.isEmpty(deps)) throw "This package has no dependencies";
+    addDependencies(deps);
   }
 
   doc.packages.forEach(function(name) {

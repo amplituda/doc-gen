@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "n-fuse GmbH",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "debug": "^2.1.1",
     "lodash": "^3.3.1",
