@@ -178,7 +178,11 @@ function genJson(options) {
       // TODO: filter out non-vcl packages here
       var json = getPackageJson(key, basePath);
       if (json.vcl === undefined) return; // not a vcl package
-      options.packages.push(json);
+
+      // don't push duplicates
+      if (_.some(options.packages, {name: json.name}) === false) {
+        options.packages.push(json);
+      }
       if (options.recursive === true) {
         if (_.isEmpty(json.dependencies)) return; // no dependencies
         addDependencies(json.dependencies, json.basePath);
