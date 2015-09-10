@@ -25,10 +25,9 @@ var getPackageJson = function(name, basedir) {
     basedir: basedir || process.cwd(),
     packageFilter: fixNoMain
   });
-
   npmModule = JSON.parse(fs.readFileSync(npmModulePath, 'utf8'));
   npmModule.basePath = path.dirname(npmModulePath) + '/';
-
+  var i = 1 / 0;
   return npmModule;
 };
 
@@ -37,12 +36,12 @@ var fetchPackage = function(pack, options) {
   var name = pack.name;
   debug('fetching package: %s', name);
   _.defaults(options, {
-    metaName: 'vcl'
+    metaName: 'vcl', // The key in package.json under which the doc gen's meta data are stored
+    readmeFile: 'README.md'
   });
 
   //var npmModule = getPackageJson(name);
   var basePath = pack.basePath;
-
 
   if (pack.vcl === undefined) {
     debug('WARN: non vcl package passed!');
@@ -51,22 +50,23 @@ var fetchPackage = function(pack, options) {
 
   var readme;
   try {
-    readme = fs.readFileSync(basePath + 'README.md');
+    readme = fs.readFileSync(basePath + options.readmeFile);
   } catch (e) {
     debug(e);
     return;
   }
+
+  var meta = pack[options.metaName];
 
   // TODO: cleanup - filter and add
   var docPart = {
     name: name,
     basePath: basePath,
     fullPath: basePath + pack.style,
-    docgen: pack[options.metaName],
+    docgen: meta,
     dependencies: pack.dependencies,
     devDependencies: pack.devDependencies,
     readme: readme,
-    style: fs.readFileSync(basePath + pack.style), // TODO: async
     demos: {},
     // extra info
     repository: pack.repository,
@@ -76,9 +76,11 @@ var fetchPackage = function(pack, options) {
     description: pack.description
   };
 
-  //console.debug(docPart);
-
-  return renderPart(docPart, options);
+  if (pack.style) {
+    docPart.style = fs.readFileSync(basePath + pack.style);
+  }
+  docPart = renderPart(docPart, options);
+  return docPart;
 };
 
 // we have all information we need. this function uses it to generate the html
@@ -101,15 +103,12 @@ var renderPart = function(docPart, options) {
       else if (obj.text.toLowerCase() === 'usage') {
         usageDepth = obj.depth; // depth of the usage heading
         inUsage = true;
-      }
-      else if (obj.text.toLowerCase() === 'demo') {
+      } else if (obj.text.toLowerCase() === 'demo') {
         return false; // filters everything after demo
       }
     }
     debug('inUsage %s', inUsage);
     if (inUsage === false || obj.type !== 'paragraph') return true;
-
-    //console.debug(obj);
 
     var result = /^\[(.*)\]\(\/(demo\/.*)\)$/.exec(obj.text);
     //console.debug(result);
@@ -137,7 +136,6 @@ var renderPart = function(docPart, options) {
 
   if (options.cssProcessor === undefined) {
     options.cssProcessor = function(style, pack) {
-
       debug('preprocessing %s', pack.name);
       debug('from %s', pack.basePath);
       var css = preprocessor.package(pack.basePath, {
@@ -145,24 +143,21 @@ var renderPart = function(docPart, options) {
         includeDevDependencies: true,
         docGenMode: true
       });
-
       return css.toString();
-
     };
   }
 
-  if (options.cssProcessor !== undefined) {
+  if (docPart.style && options.cssProcessor !== undefined) {
     docPart.style = options.cssProcessor(docPart.style, docPart);
   }
   if (!docPart.style) docPart.style = '';
 
   return docPart;
-
 };
 
 function genJson(options) {
   debug('generating json');
-  var doc = options || {};
+  var options = options || {};
   _.defaults(options, {
     basePath: '',
     packages: [],
@@ -175,12 +170,11 @@ function genJson(options) {
   function addDependencies(deps, basePath) {
     basePath = basePath || options.basePath || null;
     _.each(deps, function(val, key){
-      // TODO: filter out non-vcl packages here
       var json = getPackageJson(key, basePath);
       if (json.vcl === undefined) return; // not a vcl package
 
-      // don't push duplicates
-      if (_.some(options.packages, {name: json.name}) === false) {
+      // prevent duplicates
+      if (_.some(options.packages, { name: json.name }) === false) {
         options.packages.push(json);
       }
       if (options.recursive === true) {
@@ -192,24 +186,24 @@ function genJson(options) {
 
   if (options.entryPackage !== undefined) {
     // TODO: use resolve
-    debug('entry package');
+    debug('using entry package', options.entryPackage);
     var data = require(options.entryPackage);
     var deps = data.dependencies;
-    if (options.includeDevDependencies){
+    if (options.includeDevDependencies) {
       deps = _.merge(deps || {}, data.devDependencies || {});
     }
-    if (_.isEmpty(deps)) throw "This package has no dependencies";
+    if (_.isEmpty(deps)) throw 'This package has no dependencies';
     addDependencies(deps);
   }
-
-  doc.packages.forEach(function(name) {
+  options.packages.forEach(function(name) {
     var pack = fetchPackage(name, options);
-    if (pack) doc.parts.push(pack);
+    if (pack) options.parts.push(pack);
   });
-  return doc;
+  //console.log(options);
+  return options;
 }
 
-function genDoc(options) {
+function generateJson(options) {
   var doc = genJson(options);
   _.defaults(options, {
     output: process.cwd() + '/./doc.json'
@@ -217,7 +211,7 @@ function genDoc(options) {
   fs.writeFileSync(options.output, JSON.stringify(doc, null, 2));
 }
 
-function genHtml(options) {
+function generateHtml(options) {
   var doc = genJson(options);
   _.defaults(options, {
     output: process.cwd() + '/./somedoc.html'
@@ -227,6 +221,6 @@ function genHtml(options) {
   });
 }
 
-exports.generate = genDoc;
-exports.generateJson = genDoc;
-exports.generateHtml = genHtml;
+exports.generate = generateJson;
+exports.generateJson = generateJson;
+exports.generateHtml = generateHtml;
