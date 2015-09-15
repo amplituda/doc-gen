@@ -112,9 +112,10 @@ The file to output the finished json doc.
 
 ### removeTopHeading
 
-This option will remove level 1 headings from the package readmes. Wil default
-to `true`, because most packages have the package name as the first heading and
-the `vcl-doc-client` does already display the package name above the readme.
+With this option, all level 1 headings from the package readme files are removed.
+Defaults to `true`, because most packages have the package name as the first
+heading and the `vcl-doc-client` does already display the package name
+above the readme.
 
 **Default:** `removeTopHeading: true`
 
