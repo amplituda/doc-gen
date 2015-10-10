@@ -36,9 +36,9 @@ cd someProject
 vcl-doc-gen --entry ./package.json --output doc.html
 ```
 
-#### Options
+#### Arguments
 
-All options are optional.
+All arguments are optional.
 
 Option      | Default                 | Description
  ---        | ---                     | ---
@@ -83,34 +83,34 @@ docGenerator.generate({
 
 ## Options
 
-### name
+### `name`
 
 The name of the documentation. When using `vcl-doc-client` this will be
 displayed in the header and set as the page title.
 
 **Default:** `name: 'VCL Documentation'`
 
-### entryPackage
+### `entryPackage`
 
 The package that the doc-gen should parse to find all VCL dependencies and
 generate the documentation from.
 
 **Example:** `entryPackage: './package.json'`
 
-### packages
+### `packages`
 
 You can put a list of paths to additional packages here or use this as an
 lternative to the `entryPackage` option and set your packages manually.
 
 **Example:** `packages: ['../vcl-test', './some/package']`
 
-### output
+### `output`
 
 The file to output the finished json doc.
 
 **Default:** `output: './doc.json'`
 
-### removeTopHeading
+### `removeTopHeading`
 
 With this option, all level 1 headings from the package readme files are removed.
 Defaults to `true`, because most packages have the package name as the first
@@ -119,7 +119,7 @@ above the readme.
 
 **Default:** `removeTopHeading: true`
 
-### basePath
+### `basePath`
 
 The base path.
 
