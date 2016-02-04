@@ -23,7 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "debug": "^2.1.1",
-    "lodash": "^3.10.0",
+    "lodash": "^4.2.0",
     "marked": "^0.3.5",
     "minimist": "^1.1.1",
     "resolve": "^1.1.6",
