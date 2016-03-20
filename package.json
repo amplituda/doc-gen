@@ -9,6 +9,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vcl/doc-gen.git"
+  },
+  "keywords": [
+    "vcl",
+    "doc-gen"
+  ],
   "author": {
     "name": "n-fuse GmbH",
     "email": "info@n-fuse.de",
@@ -21,14 +29,17 @@
     }
   ],
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vcl/doc-gen/issues"
+  },
   "dependencies": {
     "debug": "^2.1.1",
-    "lodash": "^4.2.0",
+    "lodash": "^4.6.1",
     "marked": "^0.3.5",
     "minimist": "^1.1.1",
     "resolve": "^1.1.6",
-    "vcl-doc-client": "git://github.com/vcl/doc-client.git",
-    "vcl-preprocessor": "git://github.com/vcl/preprocessor.git"
+    "vcl-doc-client": "^0.1.0",
+    "vcl-preprocessor": "^0.1.0"
   }
 }
 
