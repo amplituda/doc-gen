@@ -6,9 +6,7 @@ var debug = require('debug')('vcldoc');
 var _ = require('lodash');
 var resolve = require('resolve');
 var preprocessor = require('vcl-preprocessor');
-
 var docClient = require('vcl-doc-client');
-
 var marked = require('marked');
 
 
@@ -32,9 +30,13 @@ var getPackageJson = function(name, basedir) {
 };
 
 var fetchPackage = function(pack, options) {
+
+
   // TODO: get package.json using require
   var name = pack.name;
+
   debug('fetching package: %s', name);
+
   _.defaults(options, {
     metaName: 'vcl', // The key in package.json under which the doc gen's meta data are stored
     readmeFile: 'README.md'
@@ -49,6 +51,7 @@ var fetchPackage = function(pack, options) {
   }
 
   var readme;
+
   try {
     readme = fs.readFileSync(basePath + options.readmeFile);
   } catch (e) {
@@ -77,15 +80,19 @@ var fetchPackage = function(pack, options) {
   };
 
   if (pack.style) {
-    docPart.style = fs.readFileSync(basePath + pack.style);
+    docPart.style = fs.readFileSync(basePath + pack.style, "utf8");
   }
-  docPart = renderPart(docPart, options);
-  return docPart;
+
+  var part = renderPart(docPart, options);
+  return part;
+  
 };
 
 // we have all information we need. this function uses it to generate the html
 var renderPart = function(docPart, options) {
+
   if (docPart.vcl === undefined) docPart.vcl = {};
+
   var lexer = new marked.Lexer();
   var tokens = lexer.lex(docPart.readme.toString());
   var tempLinks = tokens.links;
@@ -107,11 +114,13 @@ var renderPart = function(docPart, options) {
         return false; // filters everything after demo
       }
     }
+
     debug('inUsage %s', inUsage);
+
     if (inUsage === false || obj.type !== 'paragraph') return true;
 
     var result = /^\[(.*)\]\(\/(demo\/.*)\)$/.exec(obj.text);
-    //console.debug(result);
+
     if (result !== null && result.length > 0) {
       var exPath = docPart.basePath + result[2];
       var key = path.basename(exPath, '.html');
@@ -129,6 +138,7 @@ var renderPart = function(docPart, options) {
   docPart.readme = parsed;
 
   var fallbackTitle = /vcl-(.+)/.exec(docPart.name);
+
   if (fallbackTitle.length >= 2){
     fallbackTitle = _.capitalize(fallbackTitle[1]);
   } else fallbackTitle = _.capitalize(docPart.name);
@@ -138,25 +148,36 @@ var renderPart = function(docPart, options) {
     options.cssProcessor = function(style, pack) {
       debug('preprocessing %s', pack.name);
       debug('from %s', pack.basePath);
+      
       var css = preprocessor.package(pack.basePath, {
         providers: ['vcl-default-theme', 'vcl-default-theme-terms'],
         includeDevDependencies: true,
         docGenMode: true
       });
-      return css.toString();
+        return css;
     };
   }
 
+return new Promise((resolve, reject) => {
   if (docPart.style && options.cssProcessor !== undefined) {
-    docPart.style = options.cssProcessor(docPart.style, docPart);
-  }
-  if (!docPart.style) docPart.style = '';
+     let proc = options.cssProcessor(docPart.style, docPart);
 
-  return docPart;
+    proc.then((result) => {
+        docPart.style = result.css;
+        if (!docPart.style) docPart.style = '';
+        resolve(docPart);
+    });
+  } else if (!docPart.style) {
+    docPart.style = '';
+    resolve(docPart);
+  }
+});
+
 };
 
 function genJson(options) {
   debug('generating json');
+
   var options = options || {};
   _.defaults(options, {
     basePath: '',
@@ -195,30 +216,55 @@ function genJson(options) {
     if (_.isEmpty(deps)) throw 'This package has no dependencies';
     addDependencies(deps);
   }
+
+  var _packs = [];
   options.packages.forEach(function(name) {
     var pack = fetchPackage(name, options);
-    if (pack) options.parts.push(pack);
+     if (pack) _packs.push(pack);
+     pack.then((data) =>{
+       if (data) options.parts.push(data);
+      });
+     
+    });
+
+
+ return Promise.all(_packs)
+  .then( value => {
+    return options; 
   });
-  //console.log(options);
-  return options;
+
+
+  
 }
 
 function generateJson(options) {
   var doc = genJson(options);
+
   _.defaults(options, {
     output: process.cwd() + '/./doc.json'
   });
-  fs.writeFileSync(options.output, JSON.stringify(doc, null, 2));
+
+    doc.then((data) => {
+      fs.writeFileSync(options.output, JSON.stringify(data, null, 2));
+    });
+
 }
 
 function generateHtml(options) {
   var doc = genJson(options);
+
   _.defaults(options, {
     output: process.cwd() + '/./somedoc.html'
   });
-  docClient.getBuild(doc, function(html) {
-    fs.writeFileSync(options.output, html);
+
+    doc.then((data) => {
+    docClient.getBuild(data, function(html) {
+      fs.writeFileSync(options.output, html);
+    });
   });
+
+
+
 }
 
 exports.generate = generateJson;
