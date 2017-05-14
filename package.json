@@ -1,6 +1,6 @@
 {
   "name": "vcl-doc-gen",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "VCL Documentation Generator",
   "main": "docgen.js",
   "bin": {
@@ -19,13 +19,13 @@
   ],
   "author": {
     "name": "n-fuse GmbH",
-    "email": "info@n-fuse.de",
-    "url": "www.n-fuse.de"
+    "email": "info@n-fuse.co",
+    "url": "www.n-fuse.co"
   },
   "contributors": [
     {
       "name": "Thomas Hoppe",
-      "email": "thomas.hoppe@n-fuse.de"
+      "email": "thomas.hoppe@n-fuse.co"
     }
   ],
   "license": "MIT",
@@ -39,6 +39,6 @@
     "minimist": "^1.2.0",
     "resolve": "^1.1.7",
     "vcl-doc-client": "^0.1.0",
-    "vcl-preprocessor": "^0.1.0"
+    "vcl-preprocessor": "vcl/preprocessor"
   }
 }
