@@ -1,6 +1,6 @@
 {
-  "name": "vcl-doc-gen",
-  "version": "0.2.1",
+  "name": "@vcl/doc-gen",
+  "version": "0.2.2",
   "description": "VCL Documentation Generator",
   "main": "docgen.js",
   "bin": {
@@ -38,7 +38,7 @@
     "marked": "^0.3.6",
     "minimist": "^1.2.0",
     "resolve": "^1.1.7",
-    "vcl-doc-client": "^0.2.2",
-    "vcl-preprocessor": "0.2.1"
+    "@vcl/doc-client": "^0.2.3",
+    "@vcl/preprocessor": "^0.2.2"
   }
 }
