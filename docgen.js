@@ -150,7 +150,7 @@ var renderPart = function(docPart, options) {
       debug('from %s', pack.basePath);
 
       var css = preprocessor.package(pack.basePath, {
-        providers: ['vcl-default-theme', 'vcl-default-theme-terms'],
+        providers: ['@vcl/default-theme', '@vcl/default-theme-terms'],
         includeDevDependencies: true,
         docGenMode: true
       });
