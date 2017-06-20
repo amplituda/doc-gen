@@ -5,8 +5,8 @@ var path = require('path');
 var debug = require('debug')('vcldoc');
 var _ = require('lodash');
 var resolve = require('resolve');
-var preprocessor = require('vcl-preprocessor');
-var docClient = require('vcl-doc-client');
+var preprocessor = require('@vcl/preprocessor');
+var docClient = require('@vcl/doc-client');
 var marked = require('marked');
 
 
@@ -85,7 +85,7 @@ var fetchPackage = function(pack, options) {
 
   var part = renderPart(docPart, options);
   return part;
-  
+
 };
 
 // we have all information we need. this function uses it to generate the html
@@ -148,7 +148,7 @@ var renderPart = function(docPart, options) {
     options.cssProcessor = function(style, pack) {
       debug('preprocessing %s', pack.name);
       debug('from %s', pack.basePath);
-      
+
       var css = preprocessor.package(pack.basePath, {
         providers: ['vcl-default-theme', 'vcl-default-theme-terms'],
         includeDevDependencies: true,
@@ -224,17 +224,17 @@ function genJson(options) {
      pack.then((data) =>{
        if (data) options.parts.push(data);
       });
-     
+
     });
 
 
  return Promise.all(_packs)
   .then( value => {
-    return options; 
+    return options;
   });
 
 
-  
+
 }
 
 function generateJson(options) {
