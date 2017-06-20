@@ -137,7 +137,7 @@ var renderPart = function(docPart, options) {
 
   docPart.readme = parsed;
 
-  var fallbackTitle = /vcl-(.+)/.exec(docPart.name);
+   var fallbackTitle = /@vcl\/(.+)/.exec(docPart.name);
 
   if (fallbackTitle.length >= 2){
     fallbackTitle = _.capitalize(fallbackTitle[1]);
